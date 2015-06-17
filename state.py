@@ -7,33 +7,6 @@ class Rubik2DState(object):
         self.prior = prior
         self.kids = []
 
-    # def record_state(self, board):
-    #     # if we haven't seen it before then it's definitely valid
-    #     # if we've seen it before but it was an inferior solution, replace it with this one
-    #     if not board.solved() and \
-    #             (board not in self.soln_set.prior_states or
-    #              board.moves < self.soln_set.prior_states[board].board.moves):
-    #         state = Rubik2DState(soln_set=self.soln_set, board=board, prior=self)
-    #         self.soln_set.prior_states[board] = state
-    #         self.kids.append(state)
-    #
-    # def explore(self):
-    #     # generate every possible row/column pivot
-    #     # add to the kids list if this board hasn't been seen before
-    #     for row in range(self.board.rows):
-    #         state = self.board.pivot(row, is_row=True)
-    #         self.record_state(state)
-    #     for col in range(self.board.cols):
-    #         state = self.board.pivot(col, is_row=False)
-    #         self.record_state(state)
-    #
-    #     # if len(self.kids) > 0:
-    #     #     print "Kids at level 1: %d" % len(self.kids)
-    #
-    #     # recursively do the same for our child states
-    #     for kid in self.kids:
-    #         kid.explore()
-
     def show_prior(self):
         print self.board
         if self.prior is not None:
@@ -41,6 +14,13 @@ class Rubik2DState(object):
 
 
 class Rubik2DBoard(object):
+    """
+    Represents a particular configuration of the playing field. Note that the board itself should be considered
+    immutable -- all the mutators return new boards.
+
+    The 'moves' field is just to record scores from some arbitrary point (e.g. the problem, or possibly the solved board);
+    it's incremented with each transformation and used mostly by the solver strategies.
+    """
     def __init__(self, rows=None, cols=None, data=None, prior_moves=0, data_str=None):
         self.moves = prior_moves
 
@@ -70,15 +50,27 @@ class Rubik2DBoard(object):
         )
 
     def __hash__(self):
+        # FIXME: maybe rotations, reflections, and inversions should hash to the same value
+        # that'd cut down the state space since they're equivalent, but might lead to some awkward solutions
         return hash(self.faces)  # * hash(self.invert().faces)
 
     def __eq__(self, other):
         return self.faces == other.faces
 
     def solved(self):
+        """
+        Returns whether the board is solved (that is, if it's all 1 or all 0).
+
+        :return: True if the board is solved, False otherwise.
+        """
         return all(cell == 1 for row in self.faces for cell in row) or all(cell == 0 for row in self.faces for cell in row)
 
     def invert(self):
+        """
+        Produce an inverted version of the board.
+
+        :return: a Rubik2DBoard based on the current one, but with the bits inverted.
+        """
         return Rubik2DBoard(
             rows=self.rows, cols=self.cols,
             data=tuple([tuple([0 if cell == 1 else 1 for cell in row]) for row in self.faces]),
@@ -103,12 +95,3 @@ class Rubik2DBoard(object):
                 row[idx] = tmp[i]
 
         return Rubik2DBoard(self.rows, self.cols, data=tuple([tuple(x) for x in mutable]), prior_moves=self.moves + 1)
-
-def test_box():
-    q = Rubik2DBoard(4, 4)
-    print q
-    q = q.pivot(0, is_row=True)
-    q = q.pivot(0, is_row=False)
-    q = q.pivot(2, is_row=False)
-    print q
-

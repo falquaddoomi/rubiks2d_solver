@@ -10,7 +10,13 @@ class RubikBaseSolver(object):
     def get_board(self, board):
         return self.prior_states[board]
 
+
 class RubikFullTree(RubikBaseSolver):
+    """
+    Produces a full tree from a given solution.
+
+
+    """
     def __init__(self, rows, cols):
         super(RubikFullTree, self).__init__(rows, cols)
 

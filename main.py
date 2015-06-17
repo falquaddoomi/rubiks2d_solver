@@ -29,6 +29,7 @@ if __name__ == '__main__':
         print "exited early w/one solution"
         ex.soln.show_prior()
 
+    # tree = RubikFullTree(rows=problem.rows, cols=problem.cols)
     # print "possible boards: %d" % len(tree.prior_states)
     # hardest = tree.get_hardest()
     # hardest[1].show_prior()
